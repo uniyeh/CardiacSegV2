@@ -1,8 +1,7 @@
 import sys
-# set package path
-sys.path.append("/nfs/Workspace/CardiacSegV2")
-
 import os
+# set package path (add project root directory)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from functools import partial
 
 import pandas as pd
