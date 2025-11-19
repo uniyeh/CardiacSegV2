@@ -354,15 +354,17 @@ def main_worker(args):
         print('avg inf time:', avg_inf_time)
         
         print(eval_df.to_string())
-        
-        tune.report(
-            tt_dice=avg_tt_dice,
-            tt_iou=avg_tt_iou,
-            inf_dice=avg_inf_dice,
-            inf_iou=avg_inf_iou,
-            val_bst_acc=best_acc,
-            inf_time=avg_inf_time
-        )
+
+        # Only report to Ray Tune when not in test mode
+        if not args.test_mode:
+            tune.report(
+                tt_dice=avg_tt_dice,
+                tt_iou=avg_tt_iou,
+                inf_dice=avg_inf_dice,
+                inf_iou=avg_inf_iou,
+                val_bst_acc=best_acc,
+                inf_time=avg_inf_time
+            )
 
 
 
