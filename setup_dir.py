@@ -5,7 +5,7 @@ root_data_dir = 'dataset'
 data_names = ['chgh']
 for d in data_names:
     data_dir = os.path.join(root_data_dir, d)
-    os.makedirs(data_dir, exist_ok=True)
+    os.makedirs("/home/tcyeh3118/aicup_2025/content/CardiacSegV2/" + data_dir, exist_ok=True)
     print('mkdir data:', data_dir)
 
 
@@ -17,7 +17,7 @@ for m in model_names:
     for d in data_names:
         # make model dir
         model_exp_dir = os.path.join(exp_dir, m, d, 'tune_results')
-        os.makedirs(model_exp_dir, exist_ok=True)
+        os.makedirs("/home/tcyeh3118/aicup_2025/content/CardiacSegV2/" + model_exp_dir, exist_ok=True)
         print('mkdir exp:', model_exp_dir)
         
         # make infer dir
@@ -26,5 +26,5 @@ for m in model_names:
         # else:
         #     task_id = 't_5' if m == 'unetcnx_a1' else 't_4'
         # model_exp_dir = os.path.join(exp_dir, m, d, 'infers', task_id)
-        # os.makedirs(model_exp_dir, exist_ok=True)
+        # os.makedirs("/home/tcyeh3118/aicup_2025/content/CardiacSegV2/" + model_exp_dir, exist_ok=True)
         # print('mkdir exp:', model_exp_dir)

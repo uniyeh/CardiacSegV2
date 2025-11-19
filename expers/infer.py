@@ -1,7 +1,7 @@
 import sys
 import os
 # set package path (add project root directory)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append("/home/tcyeh3118/aicup_2025/content/CardiacSegV2")
 from functools import partial
 
 import torch

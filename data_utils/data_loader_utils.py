@@ -44,17 +44,18 @@ def get_abs_data_dicts(data_dir, data_dicts):
 
 def load_data_dict_json(data_dir, data_dict_json):
     data_dicts = load_json(data_dict_json)
+    # Support both 'train'/'val'/'test' and 'training'/'validation'/'testing' keys
     train_files = get_abs_data_dicts(
         data_dir,
-        data_dicts.get('train', None)
+        data_dicts.get('train', data_dicts.get('training', []))
     )
     val_files = get_abs_data_dicts(
         data_dir,
-        data_dicts.get('val', None)
+        data_dicts.get('val', data_dicts.get('validation', []))
     )
     test_files = get_abs_data_dicts(
         data_dir,
-        data_dicts.get('test', None)
+        data_dicts.get('test', data_dicts.get('testing', []))
     )
     print(f"train files ({len(train_files)}):", get_pids_by_data_dicts(train_files))
     print(f"val files ({len(val_files)}):", get_pids_by_data_dicts(val_files))

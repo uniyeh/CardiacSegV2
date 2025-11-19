@@ -370,11 +370,7 @@ def main_worker(args):
 
 if __name__ == "__main__":
     args = get_parser(sys.argv[1:])
-
-    # Initialize Ray with the working directory to ensure workers can import expers module
-    if not ray.is_initialized():
-        ray.init(runtime_env={"working_dir": "/home/tcyeh3118/aicup_2025/content/CardiacSegV2"})
-
+    
     if args.tune_mode == 'test':
         print('test mode')
     elif args.tune_mode == 'train':
