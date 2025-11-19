@@ -15,19 +15,35 @@ def get_tune_model_dir(root_exp_dir, exp_name):
 
     print(f"Loading results from {experiment_path}...")
 
-    # For getting results from completed experiments, we don't need a trainable
-    restored_tuner = tune.Tuner.restore(experiment_path)
-    result_grid = restored_tuner.get_results()
+    # For experiments that have been moved or don't restore properly,
+    # find the trial directory directly
+    import glob
+    trial_dirs = glob.glob(os.path.join(experiment_path, "main_*"))
 
-    best_result = result_grid.get_best_result(metric="tt_dice", mode="max")
-    print(f"\nBest trial {best_result.metrics['trial_id']}: ")
-    print('config:', best_result.metrics['config'])
-    print('tt_dice:', best_result.metrics['tt_dice'])
-    print('tt_iou:', best_result.metrics['tt_iou'])
-    if 'esc' in best_result.metrics:
-        print('esc:', best_result.metrics['esc'])
-    print(f'best log dir:', best_result.log_dir)
-    model_dir = os.path.join(best_result.log_dir, 'models')
+    if not trial_dirs:
+        raise ValueError(f"No trial directories found in {experiment_path}")
+
+    # Use the first (and usually only) trial directory
+    trial_dir = trial_dirs[0]
+    print(f"Found trial directory: {trial_dir}")
+
+    # Read the result.json to get metrics (newline-delimited JSON)
+    result_json_path = os.path.join(trial_dir, "result.json")
+    if os.path.exists(result_json_path):
+        import json
+        # Read the last line which contains the final results
+        with open(result_json_path, 'r') as f:
+            lines = f.readlines()
+            if lines:
+                result = json.loads(lines[-1])  # Parse the last line
+                print(f"\nBest trial results:")
+                print('tt_dice:', result.get('tt_dice', 'N/A'))
+                print('tt_iou:', result.get('tt_iou', 'N/A'))
+                if 'esc' in result:
+                    print('esc:', result['esc'])
+
+    model_dir = os.path.join(trial_dir, 'models')
+    print(f'Model directory: {model_dir}')
     return model_dir
 
 
