@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 def infer(model, data, model_inferer, device):
     model.eval()
     with torch.no_grad():
+        print(f"DEBUG: Image shape = {data['image'].shape}")
         output = model_inferer(data['image'].to(device))
         output = torch.argmax(output, dim=1)
     return output
