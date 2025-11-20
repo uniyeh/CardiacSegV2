@@ -87,6 +87,9 @@ def get_parser(argv):
     parser.add_argument("--loss", default=None, type=str, help="type of loss")
     parser.add_argument("--lambda_dice", default=0.5, type=float, help="lambda of dice")
     parser.add_argument("--lambda_focal", default=0.5, type=float, help="lambda of focal")
+    parser.add_argument("--tversky_alpha", default=0.3, type=float, help="alpha of tversky")
+    parser.add_argument("--tversky_beta", default=0.7, type=float, help="beta of tversky")
+    parser.add_argument("--focal_gamma", default=2.0, type=float, help="gamma of focal")
     
     # optimizer
     parser.add_argument("--optim", default=None, type=str, help="type of optimizer")

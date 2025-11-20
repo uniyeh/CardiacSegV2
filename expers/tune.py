@@ -13,7 +13,7 @@ from ray import air, tune
 from ray.tune import CLIReporter
 
 from monai.inferers import sliding_window_inference
-from monai.losses import DiceCELoss, DiceFocalLoss, DiceLoss
+from monai.losses import FocalLoss, DiceCELoss, DiceFocalLoss, DiceLoss, TverskyLoss
 from monai.metrics import DiceMetric
 from monai.transforms import (
     AsDiscrete,
@@ -89,20 +89,46 @@ def main_worker(args):
     # loss
     if args.loss == 'dice_focal_loss':
         print('loss: dice focal loss')
-        dice_loss = DiceFocalLoss(
+        loss = DiceFocalLoss(
             to_onehot_y=True, 
             softmax=True,
             gamma=2.0,
             lambda_dice=args.lambda_dice,
             lambda_focal=args.lambda_focal
         )
+    elif args.loss == 'tversky_loss':
+        print('loss: tversky loss')
+        loss = TverskyLoss(
+            to_onehot_y=True, 
+            softmax=True,
+            alpha=args.tversky_alpha,
+            beta=args.tversky_beta,
+        )
+    elif args.loss == 'compound_tversky_loss':
+        print('loss: compound tversky loss')
+        focal_loss = FocalLoss(
+            to_onehot_y=True,
+            softmax=True,
+            gamma=args.focal_gamma,
+            include_background=False
+        )
+        tversky_loss = TverskyLoss(
+            to_onehot_y=True,
+            softmax=True,
+            alpha=args.tversky_alpha,
+            beta=args.tversky_beta,,
+            include_background=False
+        )
+        lambda_focal = args.lambda_focal
+        loss = lambda y_pred, y_true: lambda_focal * focal_loss(y_pred, y_true) 
+            + (1 - lambda_focal) * tversky_loss(y_pred, y_true)
     else:
         print('loss: dice ce loss')
-        dice_loss = DiceCELoss(to_onehot_y=True, softmax=True)
+        loss = DiceCELoss(to_onehot_y=True, softmax=True)
         # print('loss: dice loss')
-        # dice_loss = DiceLoss(to_onehot_y=True, softmax=True)
+        # loss = DiceLoss(to_onehot_y=True, softmax=True)
         # print('loss: dice focal loss')
-        # dice_loss = DiceFocalLoss(
+        # loss = DiceFocalLoss(
         #     to_onehot_y=True, 
         #     softmax=True,
         #     gamma=2.0,
@@ -228,7 +254,7 @@ def main_worker(args):
             val_loader=val_loader,
             optimizer=optimizer,
             scheduler=scheduler,
-            loss_func=dice_loss,
+            loss_func=loss,
             acc_func=dice_acc,
             model_inferer=model_inferer,
             post_label=post_label,
