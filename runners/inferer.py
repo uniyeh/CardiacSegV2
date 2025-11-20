@@ -29,7 +29,11 @@ import matplotlib.pyplot as plt
 def infer(model, data, model_inferer, device):
     model.eval()
     with torch.no_grad():
-        print(f"DEBUG: Image shape = {data['image'].shape}")
+        print(f"DEBUG: Image shape before = {data['image'].shape}")
+        # Add batch dimension if missing: [C, D, H, W] -> [B, C, D, H, W]
+        if data['image'].dim() == 4:
+            data['image'] = data['image'].unsqueeze(0)
+            print(f"DEBUG: Added batch dim, shape after = {data['image'].shape}")
         output = model_inferer(data['image'].to(device))
         output = torch.argmax(output, dim=1)
     return output
