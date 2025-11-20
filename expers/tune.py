@@ -108,7 +108,6 @@ def main_worker(args):
         print('loss: compound tversky loss')
         focal_loss = FocalLoss(
             to_onehot_y=True,
-            softmax=True,
             gamma=args.focal_gamma,
             include_background=False
         )
