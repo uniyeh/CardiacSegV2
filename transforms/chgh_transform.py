@@ -1,6 +1,8 @@
 from monai.transforms import (
     AddChanneld,
     Compose,
+    CropForegroundd,
+    EnsureChannelFirstd,
     LoadImaged,
     Orientationd,
     RandFlipd,
@@ -9,9 +11,7 @@ from monai.transforms import (
     ScaleIntensityRanged,
     Spacingd,
     RandRotate90d,
-    ToTensord,
-    CropForegroundd,
-    EnsureChannelFirstd
+    ToTensord
 )
 
 def get_train_transform(args):
@@ -32,9 +32,9 @@ def get_train_transform(args):
             ),
             ScaleIntensityRanged(
                 keys=["image"],
-                a_min=args.a_min,
+                a_min=args.a_min, 
                 a_max=args.a_max,
-                b_min=args.b_min,
+                b_min=args.b_min, 
                 b_max=args.b_max,
                 clip=True,
             ),
@@ -42,7 +42,7 @@ def get_train_transform(args):
                 keys=["image", "label"],
                 label_key="label",
                 spatial_size=(args.roi_x, args.roi_y, args.roi_z),
-                pos=2, # pos=2, neg=1 代表每個 Batch 裡 2/3 的圖都必須包含瓣膜
+                pos=2,
                 neg=1,
                 num_samples=args.num_samples,
                 image_key="image",
@@ -73,7 +73,6 @@ def get_train_transform(args):
                 offsets=0.10,
                 prob=args.rand_shift_intensityd_prob,
             ),
-            EnsureChannelFirstd(keys=["image", "label"], channel_dim='no_channel'),
             ToTensord(keys=["image", "label"])
         ]
     )
@@ -97,13 +96,12 @@ def get_val_transform(args):
             ),
             ScaleIntensityRanged(
                 keys=["image"],
-                a_min=args.a_min,
-                a_max=args.a_max,
-                b_min=args.b_min,
+                a_min=args.a_min, 
+                a_max=args.a_max, 
+                b_min=args.b_min, 
                 b_max=args.b_max,
-                clip=True,
+                clip=True
             ),
-            EnsureChannelFirstd(keys=["image", "label"], channel_dim='no_channel'),
             ToTensord(keys=["image", "label"])
         ]
     )
@@ -141,8 +139,8 @@ def get_inf_transform(keys, args):
                 b_min=args.b_min,
                 b_max=args.b_max,
                 clip=True,
+                allow_missing_keys=True
             ),
-            EnsureChannelFirstd(keys=keys, channel_dim='no_channel'),
             ToTensord(keys=keys)
         ]
     )
