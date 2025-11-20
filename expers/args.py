@@ -44,6 +44,7 @@ def get_parser(argv):
     # data loader
     parser.add_argument("--data_loader", default='cache', type=str, help="cache dataset, generic dataset")
     parser.add_argument("--batch_size", default=1, type=int, help="number of batch size")
+    parser.add_argument("--gradient_accumulation_step", default=1, type=int, help="number of gradient accumulation step")
     parser.add_argument("--pin_memory", action="store_true", help="pin memory")
     parser.add_argument("--workers", default=2, type=int, help="number of workers")
 

@@ -68,20 +68,22 @@ def train_epoch(loader, model, optimizer, loss_func, writer, global_step, epoch,
             logit_map = model(x)
             loss = loss_func(logit_map, y)
         
+        loss = loss / args.gradient_accumulation_step
         loss.backward()
         epoch_loss += loss.item()
-        optimizer.step()
-        optimizer.zero_grad()
-        epoch_iterator.set_description(
-            "[Epoch %d] Training (%d Steps) (loss=%2.5f)"
-            % (epoch, global_step, loss)
-        )
 
-        writer.add_scalar("lr", get_lr(optimizer), global_step=global_step)
-        writer.add_scalar("tr_loss", loss, global_step=global_step)
-        global_step += 1
+        if (step) % args.gradient_accumulation_step == 0:
+            optimizer.step()
+            optimizer.zero_grad()
+            epoch_iterator.set_description(
+                "[Epoch %d] Training (%d Steps) (loss=%2.5f)"
+                % (epoch, global_step, loss.item() * args.gradient_accumulation_step)
+            )
+
+            writer.add_scalar("lr", get_lr(optimizer), global_step=global_step)
+            writer.add_scalar("tr_loss", loss.item() * args.gradient_accumulation_step, global_step=global_step)
+            global_step += 1
     return global_step
-
 
 def save_checkpoint(filename, model, epoch, best_acc, early_stop_count, args, optimizer=None, scheduler=None):
     state_dict = model.state_dict()
