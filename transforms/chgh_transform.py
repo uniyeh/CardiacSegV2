@@ -73,6 +73,7 @@ def get_train_transform(args):
                 offsets=0.10,
                 prob=args.rand_shift_intensityd_prob,
             ),
+            EnsureChannelFirstd(keys=["image", "label"], channel_dim='no_channel'),
             ToTensord(keys=["image", "label"])
         ]
     )
@@ -102,6 +103,7 @@ def get_val_transform(args):
                 b_max=args.b_max,
                 clip=True,
             ),
+            EnsureChannelFirstd(keys=["image", "label"], channel_dim='no_channel'),
             ToTensord(keys=["image", "label"])
         ]
     )
@@ -140,6 +142,7 @@ def get_inf_transform(keys, args):
                 b_max=args.b_max,
                 clip=True,
             ),
+            EnsureChannelFirstd(keys=keys, channel_dim='no_channel'),
             ToTensord(keys=keys)
         ]
     )
