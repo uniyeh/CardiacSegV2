@@ -116,12 +116,11 @@ def main_worker(args):
             to_onehot_y=True,
             softmax=True,
             alpha=args.tversky_alpha,
-            beta=args.tversky_beta,,
+            beta=args.tversky_beta,
             include_background=False
         )
         lambda_focal = args.lambda_focal
-        loss = lambda y_pred, y_true: lambda_focal * focal_loss(y_pred, y_true) 
-            + (1 - lambda_focal) * tversky_loss(y_pred, y_true)
+        loss = lambda y_pred, y_true: lambda_focal * focal_loss(y_pred, y_true) + (1 - lambda_focal) * tversky_loss(y_pred, y_true)
     else:
         print('loss: dice ce loss')
         loss = DiceCELoss(to_onehot_y=True, softmax=True)
