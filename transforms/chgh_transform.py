@@ -6,8 +6,7 @@ from monai.transforms import (
     RandFlipd,
     RandCropByPosNegLabeld,
     RandShiftIntensityd,
-    Clampd,
-    NormalizeIntensityd,
+    ScaleIntensityRanged,
     Spacingd,
     RandRotate90d,
     ToTensord,
@@ -27,16 +26,17 @@ def get_train_transform(args):
                 mode=("bicubic", "nearest"),
             ),
             CropForegroundd(
-                keys=["image", "label"], 
+                keys=["image", "label"],
                 source_key="image",
-                select_fn=lambda x: x > -500 
+                select_fn=lambda x: x > -500
             ),
-            # clamp image to [-200, 1500]
-            Clampd(keys=["image"], min=args.a_min, max=args.a_max),
-            NormalizeIntensityd(
+            ScaleIntensityRanged(
                 keys=["image"],
-                nonzero=True,
-                channel_wise=True,
+                a_min=args.a_min,
+                a_max=args.a_max,
+                b_min=args.b_min,
+                b_max=args.b_max,
+                clip=True,
             ),
             RandCropByPosNegLabeld(
                 keys=["image", "label"],
@@ -90,15 +90,17 @@ def get_val_transform(args):
                 mode=("bicubic", "nearest"),
             ),
             CropForegroundd(
-                keys=["image", "label"], 
+                keys=["image", "label"],
                 source_key="image",
-                select_fn=lambda x: x > -500 
+                select_fn=lambda x: x > -500
             ),
-            Clampd(keys=["image"], min=args.a_min, max=args.a_max),
-            NormalizeIntensityd(
+            ScaleIntensityRanged(
                 keys=["image"],
-                nonzero=True,
-                channel_wise=True,
+                a_min=args.a_min,
+                a_max=args.a_max,
+                b_min=args.b_min,
+                b_max=args.b_max,
+                clip=True,
             ),
             ToTensord(keys=["image", "label"])
         ]
@@ -126,15 +128,17 @@ def get_inf_transform(keys, args):
                 mode=mode,
             ),
             CropForegroundd(
-                keys=keys, 
+                keys=keys,
                 source_key="image",
-                select_fn=lambda x: x > -500 
+                select_fn=lambda x: x > -500
             ),
-            Clampd(keys=['image'], min=args.a_min, max=args.a_max),
-            NormalizeIntensityd(
+            ScaleIntensityRanged(
                 keys=['image'],
-                nonzero=True,
-                channel_wise=True,
+                a_min=args.a_min,
+                a_max=args.a_max,
+                b_min=args.b_min,
+                b_max=args.b_max,
+                clip=True,
             ),
             ToTensord(keys=keys)
         ]
