@@ -23,7 +23,7 @@ def get_train_transform(args):
             Spacingd(
                 keys=["image", "label"],
                 pixdim=(args.space_x, args.space_y, args.space_z),
-                mode=("bicubic", "nearest"),
+                mode=("trilinear", "nearest"),
             ),
             CropForegroundd(
                 keys=["image", "label"],
@@ -87,7 +87,7 @@ def get_val_transform(args):
             Spacingd(
                 keys=["image", "label"],
                 pixdim=(args.space_x, args.space_y, args.space_z),
-                mode=("bicubic", "nearest"),
+                mode=("trilinear", "nearest"),
             ),
             CropForegroundd(
                 keys=["image", "label"],
@@ -110,13 +110,13 @@ def get_val_transform(args):
 def get_inf_transform(keys, args):
     if len(keys) == 2:
         # image and label
-        mode = ("bicubic", "nearest")
+        mode = ("trilinear", "nearest")
     elif len(keys) == 3:
         # image and mutiple label
-        mode = ("bicubic", "nearest", "nearest")
+        mode = ("trilinear", "nearest", "nearest")
     else:
         # image
-        mode = ("bicubic",)
+        mode = ("trilinear",)
     return Compose(
         [
             LoadImaged(keys=keys),
