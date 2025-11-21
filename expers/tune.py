@@ -105,11 +105,13 @@ def main_worker(args):
             beta=args.tversky_beta,
         )
     elif args.loss == 'compound_tversky_loss':
+        weight_tensor = torch.tensor([1.0, 8.0, 1.0], dtype=torch.float32).cuda()
         print('loss: compound tversky loss')
         focal_loss = FocalLoss(
             to_onehot_y=True,
             gamma=args.focal_gamma,
-            include_background=False
+            include_background=False,
+            weight=weight_tensor
         )
         tversky_loss = TverskyLoss(
             to_onehot_y=True,
