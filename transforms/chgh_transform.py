@@ -25,11 +25,6 @@ def get_train_transform(args):
                 pixdim=(args.space_x, args.space_y, args.space_z),
                 mode=("trilinear", "nearest"),
             ),
-            CropForegroundd(
-                keys=["image", "label"],
-                source_key="image",
-                select_fn=lambda x: x > -500
-            ),
             ScaleIntensityRanged(
                 keys=["image"],
                 a_min=args.a_min, 
@@ -89,11 +84,6 @@ def get_val_transform(args):
                 pixdim=(args.space_x, args.space_y, args.space_z),
                 mode=("trilinear", "nearest"),
             ),
-            CropForegroundd(
-                keys=["image", "label"],
-                source_key="image",
-                select_fn=lambda x: x > -500
-            ),
             ScaleIntensityRanged(
                 keys=["image"],
                 a_min=args.a_min, 
@@ -126,11 +116,6 @@ def get_inf_transform(keys, args):
                 keys=keys,
                 pixdim=(args.space_x, args.space_y, args.space_z),
                 mode=mode,
-            ),
-            CropForegroundd(
-                keys=keys,
-                source_key="image",
-                select_fn=lambda x: x > -500
             ),
             ScaleIntensityRanged(
                 keys=['image'],
