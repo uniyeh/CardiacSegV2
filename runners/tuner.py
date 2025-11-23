@@ -48,10 +48,14 @@ def train_epoch(loader, model, optimizer, loss_func, writer, global_step, epoch,
     epoch_iterator = tqdm(
         loader, desc="Training (X / X Steps) (loss=X.X)", dynamic_ncols=True
     )
+
+    # Get gradient accumulation steps (0 or 1 means disabled)
+    grad_accum = getattr(args, 'gradient_accumulation_steps', 0)
+
     for step, batch in enumerate(epoch_iterator):
         step += 1
         x, y = (batch["image"].to(args.device), batch["label"].to(args.device))
-        
+
         if args.deep_sup:
             # ref: https://github.com/kingo233/FCT-Pytorch/blob/main/utils/model.py#L390
             logit_maps = model(x)
@@ -60,29 +64,44 @@ def train_epoch(loader, model, optimizer, loss_func, writer, global_step, epoch,
             y2 = F.interpolate(y, scale_factor=(1 / (args.patch_size * 2)))
             # cal ds loss
             loss0 = loss_func(logit_maps[0], y)
-            loss1 =loss_func(logit_maps[1], y1)
+            loss1 = loss_func(logit_maps[1], y1)
             loss2 = loss_func(logit_maps[2], y2)
             # cal final loss
             loss = 0.6*loss0 + 0.25*loss1 + 0.15*loss2
         else:
             logit_map = model(x)
             loss = loss_func(logit_map, y)
-        
-        loss = loss / args.gradient_accumulation_step
-        loss.backward()
-        epoch_loss += loss.item()
 
-        if (step) % args.gradient_accumulation_step == 0:
+        # Gradient accumulation: 0 or 1 means disabled
+        if grad_accum > 1:
+            loss = loss / grad_accum
+            loss.backward()
+            epoch_loss += loss.item()
+
+            if step % grad_accum == 0:
+                optimizer.step()
+                optimizer.zero_grad()
+                epoch_iterator.set_description(
+                    "[Epoch %d] Training (%d Steps) (loss=%2.5f)"
+                    % (epoch, global_step, loss.item() * grad_accum)
+                )
+                writer.add_scalar("lr", get_lr(optimizer), global_step=global_step)
+                writer.add_scalar("tr_loss", loss.item() * grad_accum, global_step=global_step)
+                global_step += 1
+        else:
+            # Normal training (no gradient accumulation)
+            loss.backward()
+            epoch_loss += loss.item()
             optimizer.step()
             optimizer.zero_grad()
             epoch_iterator.set_description(
                 "[Epoch %d] Training (%d Steps) (loss=%2.5f)"
-                % (epoch, global_step, loss.item() * args.gradient_accumulation_step)
+                % (epoch, global_step, loss.item())
             )
-
             writer.add_scalar("lr", get_lr(optimizer), global_step=global_step)
-            writer.add_scalar("tr_loss", loss.item() * args.gradient_accumulation_step, global_step=global_step)
+            writer.add_scalar("tr_loss", loss.item(), global_step=global_step)
             global_step += 1
+
     return global_step
 
 def save_checkpoint(filename, model, epoch, best_acc, early_stop_count, args, optimizer=None, scheduler=None):
