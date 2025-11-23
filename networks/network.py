@@ -1,4 +1,4 @@
-from monai.networks.nets import SwinUNETR, UNETR, UNet, AttentionUnet, VNet, DynUNet
+from monai.networks.nets import SwinUNETR, UNETR, UNet, AttentionUnet, VNet, DynUNet, BasicUNetPlusPlus
 from networks.cotr.network_architecture.ResTranUnet import ResTranUnet as CoTr
 from networks.unetr_pp.network_architecture.synapse.unetr_pp_synapse import UNETR_PP
 from networks.uxnet.networks.UXNet_3D.network_backbone import UXNET
@@ -243,7 +243,28 @@ def network(model_name, args):
             first_feature_size_half=args.first_feature_size_half
           ).to(args.device)
     
+    ## added unet++ 
+    elif model_name == "basicunetpp":
+        return BasicUNetPlusPlusSingleOut(
+            spatial_dims=3,                      
+            in_channels=args.in_channels,        
+            out_channels=args.out_channels,      
+            features=(32, 64, 128, 256, 512, 32),    
+            deep_supervision=False,              
+        ).to(args.device)
     
     else:
         raise ValueError(f'not found model name: {model_name}')
 
+import torch.nn as nn
+class BasicUNetPlusPlusSingleOut(nn.Module):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.backbone = BasicUNetPlusPlus(**kwargs)
+
+    def forward(self, x):
+        out = self.backbone(x) 
+        if isinstance(out, (list, tuple)):
+            return out[-1]      # take the final output
+        return out
+    
